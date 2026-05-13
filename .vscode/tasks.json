@@ -1,0 +1,60 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "PlatformIO build",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-e",
+				"esp32-s3-devkitc-1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "PlatformIO build",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-e",
+				"esp32-s3-devkitc-1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "PlatformIO build",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-e",
+				"esp32-s3-devkitc-1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "PlatformIO build",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-e",
+				"esp32-s3-devkitc-1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "PlatformIO build",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-e",
+				"esp32-s3-devkitc-1"
+			],
+			"isBackground": false
+		}
+	]
+}
