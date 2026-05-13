@@ -1,8 +1,82 @@
-# Template Base ESP32-S3 TFT
+# ESP32-S3 TFT Template Base
 
-Esta rama sirve como plantilla base para proyectos futuros sobre la misma tarjeta ESP32-S3 con pantalla TFT, touch I2C, SD_MMC y LED RGB WS2812B.
+Plantilla pública para arrancar proyectos con una placa ESP32-S3 que integra:
 
-## Hardware integrado
+- pantalla TFT ILI9341 por SPI
+- touch capacitivo CST816 por I2C
+- SD_MMC en modo 1-bit
+- LED RGB WS2812B en GPIO 42
+- salida serie por USB Serial/JTAG
+
+La idea de este repositorio es evitar volver a resolver lo mismo en cada proyecto nuevo: pines, arranque de pantalla, touch, validación de SD y estado visual del hardware ya quedan listos como base.
+
+## Qué incluye
+
+- inicialización funcional de TFT, touch, SD_MMC y LED RGB
+- prueba real de escritura y lectura sobre la SD con `test.txt`
+- monitor serie listo para USB-C en ESP32-S3
+- modo opcional de depuración táctil con `TOUCH_DEBUG_ENABLED`
+- estructura de proyecto compatible con PlatformIO
+
+## Arranque rápido
+
+### Usar como plantilla en GitHub
+
+Este repositorio está marcado como template repository, así que puedes crear uno nuevo con `Use this template` desde GitHub y empezar desde una copia limpia.
+
+### Clonar directamente
+
+```bash
+git clone https://github.com/carlosD2884MK/ESP32-S3-TFT-Template-Base.git
+cd ESP32-S3-TFT-Template-Base
+```
+
+### Abrir en VS Code
+
+1. Abre la carpeta del repositorio en VS Code.
+2. Asegúrate de tener instalada la extensión de PlatformIO.
+3. Espera a que PlatformIO resuelva e instale dependencias.
+
+### Compilar
+
+```bash
+pio run -e esp32-s3-devkitc-1
+```
+
+### Subir al ESP32-S3
+
+```bash
+pio run -e esp32-s3-devkitc-1 --target upload
+```
+
+### Abrir monitor serie
+
+```bash
+pio device monitor -b 115200
+```
+
+Notas:
+
+- Esta base usa USB Serial/JTAG por USB-C.
+- Si el puerto no abre, cierra otros monitores serie que puedan estar usándolo.
+
+## Activar depuración táctil
+
+En `platformio.ini`, descomenta esta línea dentro de `build_flags`:
+
+```ini
+;-D TOUCH_DEBUG_ENABLED
+```
+
+Déjala así:
+
+```ini
+-D TOUCH_DEBUG_ENABLED
+```
+
+Con eso se activa un overlay sobre la pantalla principal que dibuja el punto tocado y muestra coordenadas X/Y.
+
+## Hardware soportado
 
 ### Pantalla TFT ILI9341
 
@@ -16,8 +90,8 @@ Esta rama sirve como plantilla base para proyectos futuros sobre la misma tarjet
 
 Notas:
 
-- El reset de la TFT queda en `-1`, lo que indica que no hay pin dedicado y el controlador maneja la inicializacion sin reset fisico externo.
-- La pantalla se inicializa por SPI usando `Adafruit_ILI9341`.
+- `RST = -1` indica que no hay pin de reset dedicado.
+- El proyecto actual usa `Adafruit_ILI9341`.
 
 ### Touch capacitivo CST816S/D
 
@@ -25,13 +99,13 @@ Notas:
 - SCL: GPIO 15
 - INT: GPIO 17
 - RST: GPIO 18
-- Direccion primaria I2C: `0x15`
-- Direccion alternativa I2C: `0x38`
+- Dirección I2C primaria: `0x15`
+- Dirección I2C alternativa: `0x38`
 
 Notas:
 
-- El firmware prueba ambas direcciones I2C para detectar el touch.
-- Si se habilita `TOUCH_DEBUG_ENABLED`, se superpone un marcador tactil y un recuadro con coordenadas sobre la pantalla principal.
+- El firmware prueba ambas direcciones I2C.
+- Si `TOUCH_DEBUG_ENABLED` está activo, se dibuja el punto de toque sobre la pantalla base.
 
 ### SD_MMC en modo 1-bit
 
@@ -41,8 +115,8 @@ Notas:
 
 Notas:
 
-- La SD trabaja por `SD_MMC`, no por SPI.
-- Durante el arranque se monta la tarjeta, se crea `test.txt`, se escribe contenido de prueba y se vuelve a leer para validar funcionamiento real.
+- No usa SPI para la tarjeta SD.
+- En el arranque se crea `test.txt`, se escribe, se lee y se compara para validar la SD de verdad.
 
 ### LED RGB WS2812B
 
@@ -51,121 +125,58 @@ Notas:
 Notas:
 
 - El LED usa `Adafruit_NeoPixel`.
-- Se emplea como indicador de estado del arranque.
+- Refleja el estado del arranque con colores simples.
 
-## Estructura base
+## Estructura del proyecto
 
-- `src/main.cpp`: inicializacion principal de display, touch, SD y LED RGB.
-- `include/configuration.h`: concentrador de pines del hardware.
-- `include/tft_espi_setup.h`: configuracion heredada para `TFT_eSPI`, mantenida para compatibilidad aunque el proyecto actual usa `Adafruit_ILI9341`.
-- `platformio.ini`: configuracion del entorno PlatformIO.
+- `src/main.cpp`: inicialización principal y lógica base de hardware.
+- `include/configuration.h`: definición centralizada de pines.
+- `include/tft_espi_setup.h`: configuración heredada para `TFT_eSPI`, mantenida por compatibilidad.
+- `platformio.ini`: entorno PlatformIO, dependencias y flags de compilación.
 
 ## platformio.ini explicado
 
 ### Entorno
 
-- `platform = espressif32`: plataforma ESP32 en PlatformIO.
-- `board = esp32-s3-devkitc-1`: objetivo de compilacion para ESP32-S3.
+- `platform = espressif32`: plataforma ESP32 de PlatformIO.
+- `board = esp32-s3-devkitc-1`: objetivo base de compilación.
 - `framework = arduino`: uso del core Arduino sobre ESP-IDF.
 - `monitor_speed = 115200`: velocidad del monitor serie.
 
 ### USB nativo
 
-- `board_build.arduino.usb_mode = 1`: selecciona el modo USB nativo del ESP32-S3.
-- `board_build.arduino.usb_cdc_on_boot = 0`: evita usar CDC al arranque y deja disponible el canal USB Serial/JTAG, que en esta placa fue el que funciono correctamente por USB-C.
+- `board_build.arduino.usb_mode = 1`: selecciona USB nativo en ESP32-S3.
+- `board_build.arduino.usb_cdc_on_boot = 0`: deja operativo el canal USB Serial/JTAG, que fue el modo funcional probado en esta placa.
 
 ### build_flags
 
-- `-D ARDUINO_USB_MODE=1`: fija en compilacion el modo USB.
-- `-D ARDUINO_USB_CDC_ON_BOOT=0`: alinea las macros del core con el modo USB Serial/JTAG usado.
-- `-D USER_SETUP_LOADED`: evita que librerias como `TFT_eSPI` busquen configuracion por defecto externa.
-- `-include include/tft_espi_setup.h`: inyeccion de la configuracion de pantalla para proyectos que aun reutilicen `TFT_eSPI`.
+- `-D ARDUINO_USB_MODE=1`: fija el modo USB en compilación.
+- `-D ARDUINO_USB_CDC_ON_BOOT=0`: alinea las macros del core con el modo USB utilizado.
+- `-D USER_SETUP_LOADED`: evita configuraciones por defecto externas en librerías heredadas.
+- `-include include/tft_espi_setup.h`: inyecta la configuración de pantalla para compatibilidad con `TFT_eSPI`.
 
 Opcional:
 
-- `-D TOUCH_DEBUG_ENABLED`: activa el overlay de depuracion tactil. En esta rama queda desactivado por defecto para que la plantilla arranque en modo normal.
+- `-D TOUCH_DEBUG_ENABLED`: activa el overlay de depuración táctil.
 
-### Librerias
+### Librerías
 
-- `Adafruit GFX Library`: primitivas graficas base.
+- `Adafruit GFX Library`: primitivas gráficas base.
 - `Adafruit ILI9341`: driver de la pantalla TFT.
 - `Adafruit NeoPixel`: control del LED RGB WS2812B.
 
-## Flujo de arranque actual
+## Flujo de arranque
 
-1. Inicializa el LED RGB y el canal serie.
-2. Inicializa la pantalla y muestra el splash.
+1. Inicializa LED RGB y canal serie.
+2. Inicializa la pantalla y muestra splash.
 3. Detecta el touch por I2C.
 4. Monta la SD_MMC.
-5. Ejecuta una prueba real de escritura y lectura en `test.txt`.
-6. Muestra el estado del hardware en pantalla y por monitor serie.
+5. Ejecuta la prueba real de `test.txt`.
+6. Muestra estado de hardware en pantalla y monitor serie.
 
-## Recomendaciones para nuevos proyectos
+## Recomendaciones para reutilizar esta base
 
-1. Mantener `include/configuration.h` como unica fuente de verdad para pines.
-2. Activar `TOUCH_DEBUG_ENABLED` solo cuando se este calibrando o verificando el tactil.
-3. Reutilizar el test de SD si el proyecto depende de almacenamiento local.
-4. Usar el LED RGB como diagnostico rapido del estado de arranque.
-
-## Como clonar y arrancar
-
-### Clonar el repositorio
-
-```bash
-git clone https://github.com/carlosD2884MK/Teclado-Wiegand-con-pantalla-TFT-ESP32.git
-cd Teclado-Wiegand-con-pantalla-TFT-ESP32
-git checkout Template_base
-```
-
-### Abrir el proyecto
-
-1. Abrir la carpeta del repositorio en VS Code.
-2. Tener instalada la extension de PlatformIO.
-3. Esperar a que PlatformIO resuelva e instale las dependencias del entorno.
-
-### Compilar
-
-Desde VS Code:
-
-1. Abrir la paleta de comandos de PlatformIO o usar la tarea de build.
-
-Desde terminal:
-
-```bash
-pio run -e esp32-s3-devkitc-1
-```
-
-### Subir al ESP32-S3
-
-Conectar la tarjeta por USB-C y ejecutar:
-
-```bash
-pio run -e esp32-s3-devkitc-1 --target upload
-```
-
-### Abrir el monitor serie
-
-```bash
-pio device monitor -b 115200
-```
-
-Notas:
-
-- Esta plantilla usa USB Serial/JTAG en el ESP32-S3.
-- Si el puerto no abre, cerrar otros monitores serie que lo esten usando.
-
-### Activar depuracion tactil
-
-En `platformio.ini`, descomentar esta linea dentro de `build_flags`:
-
-```ini
-;-D TOUCH_DEBUG_ENABLED
-```
-
-y dejarla asi:
-
-```ini
--D TOUCH_DEBUG_ENABLED
-```
-
-Con eso se habilita el overlay de touch sobre la pantalla principal.
+1. Mantén `include/configuration.h` como fuente única de pines.
+2. Activa `TOUCH_DEBUG_ENABLED` solo durante pruebas del touch.
+3. Conserva la prueba de SD si el proyecto depende de almacenamiento.
+4. Usa el LED RGB como diagnóstico rápido del estado del sistema.
