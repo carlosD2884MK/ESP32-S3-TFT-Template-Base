@@ -106,3 +106,66 @@ Opcional:
 2. Activar `TOUCH_DEBUG_ENABLED` solo cuando se este calibrando o verificando el tactil.
 3. Reutilizar el test de SD si el proyecto depende de almacenamiento local.
 4. Usar el LED RGB como diagnostico rapido del estado de arranque.
+
+## Como clonar y arrancar
+
+### Clonar el repositorio
+
+```bash
+git clone https://github.com/carlosD2884MK/Teclado-Wiegand-con-pantalla-TFT-ESP32.git
+cd Teclado-Wiegand-con-pantalla-TFT-ESP32
+git checkout Template_base
+```
+
+### Abrir el proyecto
+
+1. Abrir la carpeta del repositorio en VS Code.
+2. Tener instalada la extension de PlatformIO.
+3. Esperar a que PlatformIO resuelva e instale las dependencias del entorno.
+
+### Compilar
+
+Desde VS Code:
+
+1. Abrir la paleta de comandos de PlatformIO o usar la tarea de build.
+
+Desde terminal:
+
+```bash
+pio run -e esp32-s3-devkitc-1
+```
+
+### Subir al ESP32-S3
+
+Conectar la tarjeta por USB-C y ejecutar:
+
+```bash
+pio run -e esp32-s3-devkitc-1 --target upload
+```
+
+### Abrir el monitor serie
+
+```bash
+pio device monitor -b 115200
+```
+
+Notas:
+
+- Esta plantilla usa USB Serial/JTAG en el ESP32-S3.
+- Si el puerto no abre, cerrar otros monitores serie que lo esten usando.
+
+### Activar depuracion tactil
+
+En `platformio.ini`, descomentar esta linea dentro de `build_flags`:
+
+```ini
+;-D TOUCH_DEBUG_ENABLED
+```
+
+y dejarla asi:
+
+```ini
+-D TOUCH_DEBUG_ENABLED
+```
+
+Con eso se habilita el overlay de touch sobre la pantalla principal.
