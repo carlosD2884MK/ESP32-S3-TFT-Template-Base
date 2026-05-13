@@ -10,6 +10,10 @@ Plantilla pública para arrancar proyectos con una placa ESP32-S3 que integra:
 
 La idea de este repositorio es evitar volver a resolver lo mismo en cada proyecto nuevo: pines, arranque de pantalla, touch, validación de SD y estado visual del hardware ya quedan listos como base.
 
+Licencia:
+
+- Esta plantilla se publica bajo licencia MIT. Ver [LICENSE](LICENSE).
+
 ## Qué incluye
 
 - inicialización funcional de TFT, touch, SD_MMC y LED RGB
